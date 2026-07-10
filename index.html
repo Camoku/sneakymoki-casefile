@@ -1,0 +1,683 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}html,body{margin:0;background:#070b08}</style></head><body>
+<title>SNEAKYMOKI // CASE FILE</title>
+<style>
+  :root{
+    --void:#070b08;
+    --panel:#0b120d;
+    --panel-2:#0e1711;
+    --line:#1c3226;
+    --phos:#41ffa0;      /* phosphor green */
+    --phos-dim:#2bd985;
+    --moss:#6f9a80;      /* muted readable green */
+    --moss-2:#4f7563;
+    --amber:#ffb443;     /* timecode / caution */
+    --rec:#ff3b3b;       /* record red */
+    --mono: ui-monospace,"SF Mono","Cascadia Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  body{margin:0;}
+
+  .stage{
+    background:
+      radial-gradient(120% 90% at 50% 0%, #0c1610 0%, var(--void) 60%, #04060500 100%),
+      var(--void);
+    color:var(--moss);
+    font-family:var(--sans);
+    line-height:1.5;
+    min-height:100vh;
+    padding:clamp(14px,3vw,34px);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* scanline + vignette + flicker overlays */
+  .stage::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,.16) 3px,
+      rgba(0,0,0,0) 4px);
+    mix-blend-mode:multiply;
+  }
+  .stage::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:61;
+    background:radial-gradient(130% 100% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);
+    animation:flicker 5.5s steps(60) infinite;
+  }
+  @keyframes flicker{
+    0%,100%{opacity:.9;} 47%{opacity:.86;} 48%{opacity:.98;} 49%{opacity:.84;}
+    50%{opacity:.95;} 92%{opacity:.9;} 93%{opacity:1;} 94%{opacity:.88;}
+  }
+
+  .wrap{max-width:1120px;margin:0 auto;position:relative;z-index:2;}
+
+  /* ── top status rail ── */
+  .rail{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;
+    font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    color:var(--moss-2);text-transform:uppercase;
+    border:1px solid var(--line);
+    background:linear-gradient(var(--panel),var(--panel-2));
+    padding:9px 14px;border-radius:4px;
+  }
+  .rec{display:inline-flex;align-items:center;gap:8px;color:var(--rec);font-weight:600;}
+  .rec .dot{width:9px;height:9px;border-radius:50%;background:var(--rec);
+    box-shadow:0 0 8px var(--rec);animation:blink 1.1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:.15;}}
+  .rail .sep{flex:1;}
+  .tc{color:var(--amber);font-variant-numeric:tabular-nums;}
+  .live{color:var(--phos);}
+
+  /* ── header / hero ── */
+  header.hero{
+    margin-top:16px;
+    border:1px solid var(--line);
+    background:
+      linear-gradient(180deg, rgba(65,255,160,.05), transparent 40%),
+      var(--panel);
+    border-radius:6px;
+    padding:clamp(20px,3.5vw,40px);
+    position:relative;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.34em;
+    color:var(--phos-dim);text-transform:uppercase;
+    display:flex;align-items:center;gap:12px;
+  }
+  .eyebrow::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent);}
+  h1{
+    position:relative;
+    font-family:var(--mono);
+    font-size:clamp(34px,7.2vw,74px);
+    line-height:.94;letter-spacing:-.01em;
+    margin:.34em 0 .12em;
+    color:var(--phos);
+    text-shadow:0 0 18px rgba(65,255,160,.35), 0 0 3px rgba(65,255,160,.6);
+    text-wrap:balance;
+    width:max-content;max-width:100%;
+  }
+  h1 .slash{color:var(--amber);text-shadow:0 0 14px rgba(255,180,67,.4);}
+  /* glitch layers — brief chromatic tear, ties in the game's glitch shader */
+  h1::before,h1::after{
+    content:attr(data-text);
+    position:absolute;left:0;top:0;width:100%;
+    pointer-events:none;opacity:0;
+  }
+  h1::before{color:#33e6ff;text-shadow:0 0 8px rgba(51,230,255,.5);}
+  h1::after{color:var(--rec);text-shadow:0 0 8px rgba(255,59,59,.5);}
+  h1::before{animation:glitchA 6.5s infinite steps(1);}
+  h1::after{animation:glitchB 6.5s infinite steps(1);}
+  @keyframes glitchA{
+    0%,90%,100%{opacity:0;transform:none;clip-path:none;}
+    91%{opacity:.85;transform:translate(-3px,1px);clip-path:inset(12% 0 58% 0);}
+    93%{opacity:.7;transform:translate(2px,-1px);clip-path:inset(62% 0 12% 0);}
+    95%{opacity:.8;transform:translate(-2px,0);clip-path:inset(38% 0 40% 0);}
+    97%{opacity:0;}
+  }
+  @keyframes glitchB{
+    0%,90%,100%{opacity:0;transform:none;clip-path:none;}
+    91%{opacity:.7;transform:translate(3px,-1px);clip-path:inset(20% 0 50% 0);}
+    93%{opacity:.85;transform:translate(-3px,1px);clip-path:inset(55% 0 18% 0);}
+    95%{opacity:.65;transform:translate(2px,0);clip-path:inset(44% 0 34% 0);}
+    97%{opacity:0;}
+  }
+  .dossier-line{
+    font-family:var(--mono);font-size:13px;letter-spacing:.05em;
+    color:var(--moss);max-width:60ch;
+  }
+  .dossier-line b{color:var(--phos-dim);font-weight:600;}
+
+  .subject-row{
+    margin-top:22px;padding-top:18px;border-top:1px dashed var(--line);
+    display:flex;flex-wrap:wrap;gap:20px 24px;align-items:flex-start;
+  }
+  .mugshot{margin:0;flex:0 0 auto;width:118px;}
+  .mugshot .photo{
+    position:relative;border:1px solid var(--phos-dim);border-radius:3px;
+    background:
+      linear-gradient(180deg, rgba(65,255,160,.10), rgba(7,11,8,.6)),
+      repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.25) 3px);
+    padding:12px 10px;display:flex;justify-content:center;align-items:flex-end;
+    height:118px;overflow:hidden;
+    box-shadow:0 0 14px rgba(65,255,160,.12) inset;
+  }
+  .mugshot img{
+    image-rendering:pixelated;height:88px;width:auto;
+    filter:drop-shadow(0 0 6px rgba(65,255,160,.35));
+  }
+  .mugshot .scan{
+    position:absolute;left:0;right:0;height:14px;pointer-events:none;
+    background:linear-gradient(rgba(65,255,160,.28),transparent);
+    animation:scandown 3.2s linear infinite;
+  }
+  @keyframes scandown{0%{top:-14px;}100%{top:118px;}}
+  .mugshot figcaption{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    color:var(--amber);text-transform:uppercase;text-align:center;
+    margin-top:7px;
+  }
+  .mugshot .tag{
+    font-family:var(--mono);font-size:9px;letter-spacing:.16em;
+    text-transform:uppercase;text-align:center;margin-bottom:5px;
+    color:var(--phos-dim);
+  }
+  /* THREAT variant — red monitor, hostile subject */
+  .mugshot.threat .photo{
+    border-color:var(--rec);
+    background:
+      linear-gradient(180deg, rgba(255,59,59,.12), rgba(7,11,8,.6)),
+      repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.25) 3px);
+    box-shadow:0 0 14px rgba(255,59,59,.14) inset;
+  }
+  .mugshot.threat img{filter:drop-shadow(0 0 6px rgba(255,59,59,.4));height:52px;}
+  .mugshot.threat .tag{color:var(--rec);}
+  .mugshot.threat figcaption{color:var(--rec);}
+  .mugshot .scan.red{background:linear-gradient(rgba(255,59,59,.3),transparent);}
+  .subject{
+    display:grid;grid-template-columns:auto 1fr;gap:10px 22px;
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;
+    flex:1 1 260px;min-width:240px;
+  }
+  .subject dt{color:var(--moss-2);text-transform:uppercase;letter-spacing:.14em;}
+  .subject dd{margin:0;color:var(--phos);}
+  .subject dd.amber{color:var(--amber);}
+  .bar{color:var(--phos);letter-spacing:2px;}
+
+  /* ── feed grid ── */
+  .grid{
+    margin-top:16px;
+    display:grid;gap:14px;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  }
+  .feed{
+    position:relative;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    padding:18px 18px 20px;
+    overflow:hidden;
+  }
+  .feed.wide{grid-column:1/-1;}
+  /* corner brackets */
+  .feed::before,.feed::after{
+    content:"";position:absolute;width:14px;height:14px;pointer-events:none;
+    border:2px solid var(--phos-dim);opacity:.5;
+  }
+  .feed::before{top:7px;left:7px;border-right:0;border-bottom:0;}
+  .feed::after{bottom:7px;right:7px;border-left:0;border-top:0;}
+
+  .cam{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    color:var(--moss-2);text-transform:uppercase;margin-bottom:12px;
+  }
+  .cam .id{color:var(--amber);}
+  .cam .ok{color:var(--phos-dim);}
+  .feed h2{
+    font-family:var(--mono);font-weight:600;
+    font-size:clamp(17px,2.4vw,21px);letter-spacing:.01em;
+    margin:0 0 8px;color:var(--phos);text-wrap:balance;
+  }
+  .feed p{margin:0 0 10px;font-size:14.5px;color:var(--moss);max-width:64ch;}
+  .feed p:last-child{margin-bottom:0;}
+  .feed strong{color:var(--phos-dim);font-weight:600;}
+  .feed .amber{color:var(--amber);}
+
+  ul.tags{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:7px;}
+  ul.tags li{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;
+    color:var(--phos-dim);border:1px solid var(--line);
+    background:rgba(65,255,160,.04);
+    padding:4px 9px;border-radius:3px;
+  }
+
+  .kicker{ /* the mission hero line */
+    font-size:clamp(15px,2vw,17px);color:var(--moss);max-width:70ch;
+  }
+  .kicker .hot{color:var(--phos);font-weight:600;}
+  .no-words{
+    margin-top:14px;display:inline-block;font-family:var(--mono);
+    font-size:12.5px;letter-spacing:.08em;color:var(--void);
+    background:var(--amber);padding:5px 12px;border-radius:3px;font-weight:700;
+    text-transform:uppercase;
+  }
+
+  /* ── classified rubber stamp ── */
+  .stamp{
+    position:absolute;top:16px;right:14px;z-index:5;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-family:var(--mono);text-transform:uppercase;text-align:center;
+    color:var(--rec);
+    border:2px solid var(--rec);border-radius:5px;
+    padding:6px 12px;transform:rotate(7deg);opacity:.72;
+    box-shadow:0 0 10px rgba(255,59,59,.18) inset;
+    mix-blend-mode:screen;
+  }
+  .stamp .big{font-size:15px;font-weight:700;letter-spacing:.18em;}
+  .stamp .sub{font-size:9.5px;letter-spacing:.1em;color:var(--amber);}
+  @media (max-width:560px){
+    .stamp{position:static;transform:rotate(-3deg);align-self:flex-start;
+      margin:0 0 10px;opacity:.85;}
+  }
+
+  /* ── evidence stat strip ── */
+  .evidence{
+    margin-top:16px;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    padding:16px 18px;position:relative;
+  }
+  .ev-label{
+    font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--moss-2);margin-bottom:12px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .ev-label::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent);}
+  .stats{
+    display:grid;gap:1px;background:var(--line);
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  }
+  .stat{
+    background:var(--panel);padding:14px 12px;
+    display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+  }
+  .stat .n{
+    font-family:var(--mono);font-size:clamp(26px,4vw,34px);line-height:1;
+    color:var(--phos);font-variant-numeric:tabular-nums;
+    text-shadow:0 0 12px rgba(65,255,160,.3);
+  }
+  .stat .n em{font-style:normal;font-size:.55em;color:var(--phos-dim);}
+  .stat .l{
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--moss-2);
+  }
+  .stat.hot{background:linear-gradient(180deg,rgba(255,180,67,.08),var(--panel));}
+  .stat.hot .n{color:var(--amber);text-shadow:0 0 12px rgba(255,180,67,.35);}
+  .stat.hot .l{color:var(--amber);}
+
+  /* ── DVR playback timeline ── */
+  .dvr{
+    margin-top:16px;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    padding:16px 18px 10px;
+  }
+  .dvr .ev-head{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--moss-2);margin-bottom:16px;
+  }
+  .dvr .ev-head .play{color:var(--phos);letter-spacing:0;}
+  .dvr .ev-head .rule{height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent);}
+  .timeline{overflow-x:auto;padding-bottom:10px;}
+  ol.events{display:flex;list-style:none;margin:0;padding:0;min-width:min-content;}
+  .ev{position:relative;flex:1 0 178px;padding:0 12px;}
+  .dot-row{position:relative;height:20px;margin-bottom:12px;}
+  .dot-row::before{content:"";position:absolute;top:50%;left:0;right:0;height:2px;
+    background:var(--line);transform:translateY(-1px);}
+  .ev:first-child .dot-row::before{left:50%;}
+  .ev:last-child .dot-row::before{right:50%;}
+  .dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:12px;height:12px;border-radius:50%;background:var(--panel-2);
+    border:2px solid var(--phos-dim);z-index:2;box-shadow:0 0 8px rgba(65,255,160,.35);}
+  .ev.live .dot{background:var(--rec);border-color:var(--rec);
+    box-shadow:0 0 10px var(--rec);animation:blink 1.1s steps(1) infinite;}
+  .ev time{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+    color:var(--amber);margin-bottom:4px;text-transform:uppercase;}
+  .ev.live time{color:var(--rec);}
+  .ev h3{font-family:var(--mono);font-size:14px;font-weight:600;margin:0 0 5px;
+    color:var(--phos);letter-spacing:.02em;}
+  .ev p{margin:0;font-size:12.5px;line-height:1.45;color:var(--moss);}
+  @media (prefers-reduced-motion: reduce){ .ev.live .dot{animation:none;} }
+
+  /* ── footer status ── */
+  .status{
+    margin-top:16px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;
+    font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid var(--line);border-radius:4px;
+    background:linear-gradient(var(--panel),var(--panel-2));padding:12px 16px;
+    color:var(--moss-2);
+  }
+  .status .val{color:var(--phos);}
+  .status .val.amber{color:var(--amber);}
+  .status .grow{flex:1;}
+  .sig{color:var(--moss-2);}
+  .sig b{color:var(--phos-dim);}
+
+  /* ── interactive CAM switcher ── */
+  .feed{cursor:pointer;transition:opacity .3s ease, box-shadow .3s ease, border-color .3s ease, transform .3s ease;}
+  .feed:focus-visible{outline:2px solid var(--phos);outline-offset:3px;}
+  .grid.has-selection .feed{opacity:.4;}
+  .grid.has-selection .feed.selected{
+    opacity:1;border-color:var(--phos);
+    box-shadow:0 0 22px rgba(65,255,160,.18);transform:translateY(-2px);
+  }
+  .feed.selected .cam .id{color:var(--phos);}
+  .feed.selected .cam .ok{color:var(--phos);}
+
+  /* ── patrolling rat easter egg ── */
+  .rat-patrol{
+    position:fixed;bottom:6px;left:0;z-index:55;pointer-events:none;
+    width:42px;height:31px;transform:translateX(110vw);
+    animation:ratcross 19s linear infinite;
+  }
+  .rat-patrol img{
+    width:42px;height:auto;image-rendering:pixelated;display:block;
+    filter:drop-shadow(0 3px 3px rgba(0,0,0,.5));
+    animation:rathop .32s steps(2) infinite;
+  }
+  @keyframes ratcross{
+    0%{transform:translateX(110vw);}
+    22%{transform:translateX(-14vw);}
+    100%{transform:translateX(-14vw);}
+  }
+  @keyframes rathop{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+
+  /* ── boot-up terminal overlay ── */
+  .boot{
+    position:fixed;inset:0;z-index:120;background:var(--void);
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity .45s ease;
+  }
+  .boot.gone{opacity:0;pointer-events:none;}
+  .boot pre{
+    font-family:var(--mono);font-size:clamp(11px,2.4vw,14px);
+    color:var(--phos);margin:0;padding:20px;
+    text-shadow:0 0 8px rgba(65,255,160,.4);
+    max-width:92vw;white-space:pre-wrap;line-height:1.7;
+  }
+  .boot .cursor{
+    display:inline-block;width:.6em;height:1.05em;vertical-align:-2px;
+    background:var(--phos);box-shadow:0 0 8px var(--phos);
+    animation:blink 1s steps(1) infinite;
+  }
+
+  /* boot reveal */
+  .reveal{opacity:0;transform:translateY(8px) scale(.997);filter:brightness(.4);}
+  .booted .reveal{opacity:1;transform:none;filter:none;
+    transition:opacity .5s ease, transform .5s ease, filter .6s ease;}
+
+  @media (prefers-reduced-motion: reduce){
+    .stage::after{animation:none;opacity:.92;}
+    .rec .dot{animation:none;}
+    .mugshot .scan{animation:none;opacity:0;}
+    h1::before,h1::after{animation:none;opacity:0;}
+    .rat-patrol{display:none;}
+    .boot .cursor{animation:none;}
+    .reveal{opacity:1;transform:none;filter:none;transition:none;}
+  }
+</style>
+
+<div class="boot" id="boot"><pre id="bootlog"></pre></div>
+
+<div class="rat-patrol" id="ratpatrol">
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB8AAAAXCAYAAADz/ZRUAAABuUlEQVR4nLVWu0oDQRS9s0zhR1gom0KtLGIRC8FKG/0DQQur/YAtBIuARQrtLHSbQDrtTCUIooUpbOxUWLALCPmEwMiZeJfJ7GRf2RwI88ycc1+zIygHjdaB4n486AuqETKP+Lpzrvsfnz8UESkIqEuQyCKetcaCgCBsVxYgZ5GaBFk4PT5KPFKWXPy3iZWPr+9TG/Z2tsi1hjAAUbdX2XIBYt/39eA7jkkKkZCA2LWm49/tzR1zb6wUNZtN/QM6N3eJVfYaxsDm+mrhsGRBSiHEWE1Ovby91wcz1rYP6evtIRn/DodTf4aAIKwWb044BXfCYpOYD4cAJBVgr88LwclmJ1oZVC03yRkfhO1UXS/K4lSdu5SjfiGAE7BuEV6Rq9UFFgRgX9aNWJqcwfXMrT0/D7y8DbAKRPZ9zvmwMPIgbOuWieBqnnOJLOt66ZrEIUzIVtpC6kg+L28Dk6Hlfh3xdpJzls+yzI7/Qi0vCrP0aiGPKrj3YrelKidcPOgLfKngWv1K6fZSZQUrzbDw9/1kaUT7K8tEBQScPQ9E6ko1M51hesBV3+bDApZrAUS00Zg8RFy4enqhP/R64AVgu9gaAAAAAElFTkSuQmCC" alt="" width="42" height="31" style="transform:scaleX(1)">
+</div>
+
+<div class="stage">
+  <div class="wrap">
+
+    <div class="rail">
+      <span class="rec"><span class="dot"></span>REC</span>
+      <span>CAM&nbsp;<span class="live" id="camno">01</span>/07</span>
+      <span>FEED&nbsp;<span class="live">LIVE</span></span>
+      <span class="sep"></span>
+      <span id="datestamp">SURVEILLANCE ARCHIVE</span>
+      <span class="tc" id="tc">00:00:00:00</span>
+    </div>
+
+    <header class="hero reveal">
+      <div class="stamp"><span class="big">CONFIDENTIAL</span><span class="sub">CASE&nbsp;#SM-01 &middot; CLEARED</span></div>
+      <div class="eyebrow">Confidential &middot; Studio Dossier</div>
+      <h1 data-text="SNEAKY/MOKI">SNEAKY<span class="slash">/</span>MOKI</h1>
+      <p class="dossier-line"><b>CASE FILE:</b> one Moki, a building full of rats, and a rescue that has to be pulled off in total silence.</p>
+
+      <p class="kicker" style="margin-top:18px;">A <span class="hot">stealth game</span> where a Moki sneaks through rat-guarded rooms, frees caged Tamakins, and slips out the door &mdash; under one ruthless rule the director locked in from day one:</p>
+      <span class="no-words">Constraint // ZERO instructions. The game must teach itself.</span>
+
+      <div class="subject-row">
+        <figure class="mugshot">
+          <div class="tag suspect">Suspect</div>
+          <div class="photo">
+            <img src="data:image/png;base64,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" alt="Shadow Moki, subject #3284" width="61" height="64">
+            <span class="scan"></span>
+          </div>
+          <figcaption>#3284 &middot; SHADOW MOKI</figcaption>
+        </figure>
+        <figure class="mugshot threat">
+          <div class="tag">Most Wanted</div>
+          <div class="photo">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB8AAAAXCAYAAADz/ZRUAAABuUlEQVR4nLVWu0oDQRS9s0zhR1gom0KtLGIRC8FKG/0DQQur/YAtBIuARQrtLHSbQDrtTCUIooUpbOxUWLALCPmEwMiZeJfJ7GRf2RwI88ycc1+zIygHjdaB4n486AuqETKP+Lpzrvsfnz8UESkIqEuQyCKetcaCgCBsVxYgZ5GaBFk4PT5KPFKWXPy3iZWPr+9TG/Z2tsi1hjAAUbdX2XIBYt/39eA7jkkKkZCA2LWm49/tzR1zb6wUNZtN/QM6N3eJVfYaxsDm+mrhsGRBSiHEWE1Ovby91wcz1rYP6evtIRn/DodTf4aAIKwWb044BXfCYpOYD4cAJBVgr88LwclmJ1oZVC03yRkfhO1UXS/K4lSdu5SjfiGAE7BuEV6Rq9UFFgRgX9aNWJqcwfXMrT0/D7y8DbAKRPZ9zvmwMPIgbOuWieBqnnOJLOt66ZrEIUzIVtpC6kg+L28Dk6Hlfh3xdpJzls+yzI7/Qi0vCrP0aiGPKrj3YrelKidcPOgLfKngWv1K6fZSZQUrzbDw9/1kaUT7K8tEBQScPQ9E6ko1M51hesBV3+bDApZrAUS00Zg8RFy4enqhP/R64AVgu9gaAAAAAElFTkSuQmCC" alt="Ratz guard, the threat" width="31" height="23">
+            <span class="scan red"></span>
+          </div>
+          <figcaption>RATZ &middot; ARMED &amp; HUNGRY</figcaption>
+        </figure>
+        <dl class="subject">
+          <dt>Subject</dt><dd>CAMMYYY &ndash; a.k.a. Shadow Moki</dd>
+          <dt>Role</dt><dd class="amber">CREATIVE DIRECTOR &mdash; design &amp; feel lead</dd>
+          <dt>Directive</dt><dd>Call the shots on what it is &amp; how it feels; the crew builds to it</dd>
+          <dt>Operation</dt><dd><span class="bar">&#9646;&#9646;&#9646;&#9646;&#9646;</span> COMPLETE &mdash; shipped &amp; live</dd>
+        </dl>
+      </div>
+    </header>
+
+    <div class="evidence reveal">
+      <div class="ev-label">Evidence&nbsp;log</div>
+      <div class="stats">
+        <div class="stat"><span class="n">25</span><span class="l">Levels</span></div>
+        <div class="stat"><span class="n">16</span><span class="l">Modular pieces</span></div>
+        <div class="stat"><span class="n">4</span><span class="l">Screen shaders</span></div>
+        <div class="stat"><span class="n">3</span><span class="l">Crew</span></div>
+        <div class="stat"><span class="n">13.8<em>k</em></span><span class="l">Lines of code</span></div>
+        <div class="stat hot"><span class="n">0</span><span class="l">Words of tutorial</span></div>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <section class="feed reveal">
+        <div class="cam"><span class="id">CAM-02</span><span>DESIGN&nbsp;CALLS</span><span class="ok">&#9679; REC</span></div>
+        <h2>The calls that made it tick</h2>
+        <p><strong>One choice, whole game.</strong> Sneak = slow &amp; silent. Run = fast &amp; <span class="amber">LOUD</span>. That single trade-off is the entire tension &mdash; and it never stops mattering.</p>
+        <p><strong>The chase is scary on purpose.</strong> Spotted doesn't mean instant-fail &mdash; the rat <em>runs you down</em>, and you have to break line of sight to lose it.</p>
+        <p><strong>Traps scare, rats catch.</strong> Cameras &amp; lasers only sound the alarm and send the pack to you. Clean, readable rule.</p>
+        <ul class="tags"><li>Fear package</li><li>heartbeat + red pulse</li><li>pack-join squeals</li><li>relentless speed-up</li><li>gentle reset</li></ul>
+      </section>
+
+      <section class="feed reveal">
+        <div class="cam"><span class="id">CAM-03</span><span>THE&nbsp;TOOLBOX</span><span class="ok">&#9679; REC</span></div>
+        <h2>Gadgets on the belt</h2>
+        <p>A kit of toys that all read at a glance &mdash; and thanks to a <strong>modular</strong> build, adding one new gadget instantly works in <em>every level ever made</em>.</p>
+        <ul class="tags"><li>&#127838; throw-to-lure snacks</li><li>hide-in trashcans</li><li>keys + matching gates</li><li>reversing lockpick dial</li><li>teleport vents</li><li>pressure plates</li></ul>
+      </section>
+
+      <section class="feed reveal">
+        <div class="cam"><span class="id">CAM-04</span><span>TEACH&nbsp;/&nbsp;NO&nbsp;WORDS</span><span class="ok">&#9679; REC</span></div>
+        <h2>It teaches without a single word</h2>
+        <p>The masterstroke: the <strong>title screen plays the game at you</strong> &mdash; a ghost Moki sneaks, throws snacks, runs, rescues &amp; hides on loop. Players learn just by watching the menu.</p>
+        <p>Backed by camera sweeps that whisper &ldquo;look around,&rdquo; glowing hidden Tamakins that <span class="amber">chirp</span> to bait your curiosity, and a &ldquo;held overhead&rdquo; pose the first time you grab a snack.</p>
+      </section>
+
+      <section class="feed reveal">
+        <div class="cam"><span class="id">CAM-05</span><span>VISUAL&nbsp;IDENTITY</span><span class="ok">&#9679; REC</span></div>
+        <h2>The whole thing is a security feed</h2>
+        <p>You gave it one cohesive look: a <strong>hacked surveillance monitor</strong>. Scanlines, glitches, a REC dot, live timecode, a boot-up sequence, cycling CAM POVs, even a procedural humming room-tone.</p>
+        <ul class="tags"><li>CRT screen curve</li><li>glow / bloom</li><li>glitch shader</li><li>FEED PAUSED</li><li>&#128308; live REC</li></ul>
+      </section>
+
+      <section class="feed reveal">
+        <div class="cam"><span class="id">CAM-06</span><span>ENGINE&nbsp;ROOM</span><span class="ok">&#9679; REC</span></div>
+        <h2>The tech flex under the hood</h2>
+        <p>Levels are <strong>data, not hand-built scenes</strong> &mdash; so they can be mass-produced. You built a <strong>drag-and-drop level editor</strong> with a procedural room generator <em>and</em> a live &ldquo;is this even beatable?&rdquo; solver.</p>
+        <ul class="tags"><li>25-level campaign</li><li>ascending difficulty</li><li>modular piece library</li><li>&#127760; live on the web</li></ul>
+      </section>
+
+      <section class="feed reveal">
+        <div class="cam"><span class="id">CAM-07</span><span>THE&nbsp;CREW</span><span class="ok">&#9679; REC</span></div>
+        <h2>You direct, the crew builds</h2>
+        <p>Your vision set the target; the team filled in the craft.</p>
+        <ul class="tags"><li>CAMMYYY &mdash; director / design &amp; feel</li><li>ALRICKI &mdash; levels + editor tooling</li><li>SEAN &mdash; audio: chase music, drips, SFX</li></ul>
+        <p style="margin-top:12px;">All merged into one polished build. &#127881;</p>
+      </section>
+
+    </div>
+
+    <section class="dvr reveal">
+      <div class="ev-head"><span class="play">&#9654; DVR&nbsp;PLAYBACK</span> <span>Operation&nbsp;log</span> <span class="rule"></span> <span>Scrub&nbsp;&raquo;</span></div>
+      <div class="timeline">
+        <ol class="events">
+          <li class="ev">
+            <div class="dot-row"><span class="dot"></span></div>
+            <time>REC 01 &middot; Jul 06</time>
+            <h3>Infiltration</h3>
+            <p>The core verb: sneak vs. run. Rescue loop, soft-reset, and the modular piece box that makes every level data.</p>
+          </li>
+          <li class="ev">
+            <div class="dot-row"><span class="dot"></span></div>
+            <time>REC 02 &middot; Jul 07</time>
+            <h3>The Fear</h3>
+            <p>Spotted &rarr; the rat runs you down. Heartbeat, pack-join squeals, relentless speed-up &mdash; plus the self-teaching attract demo.</p>
+          </li>
+          <li class="ev">
+            <div class="dot-row"><span class="dot"></span></div>
+            <time>REC 03 &middot; Jul 08</time>
+            <h3>Blueprints</h3>
+            <p>The drag-and-drop level editor lands &mdash; procedural room generator and a live &ldquo;is it beatable?&rdquo; solver.</p>
+          </li>
+          <li class="ev">
+            <div class="dot-row"><span class="dot"></span></div>
+            <time>REC 04 &middot; Jul 09</time>
+            <h3>The Campaign</h3>
+            <p>Wordless campaign takes shape: Act II gadget rooms and the camera that always points you at the exit.</p>
+          </li>
+          <li class="ev">
+            <div class="dot-row"><span class="dot"></span></div>
+            <time>REC 05 &middot; Jul 10</time>
+            <h3>The Crew</h3>
+            <p>Alricki&rsquo;s 25-level ascending campaign and Sean&rsquo;s audio &mdash; chase music, drips, SFX &mdash; all merged in.</p>
+          </li>
+          <li class="ev live">
+            <div class="dot-row"><span class="dot"></span></div>
+            <time>&#9679; LIVE</time>
+            <h3>Surveillance</h3>
+            <p>The security-feed identity: shaders, boot sequence, results card. Feature-complete &amp; shipped.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="status reveal">
+      <span>STATUS <span class="val">&#9679; SHIPPED</span></span>
+      <span>BUILD <span class="val amber">WEB / LIVE</span></span>
+      <span>THREAT LEVEL <span class="val">&#128056;&#128056;&#128056;</span></span>
+      <span class="grow"></span>
+      <span class="sig">CASE CLOSED &mdash; <b>you took &ldquo;no words&rdquo; and made it the whole personality.</b></span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // live security-feed timecode: HH:MM:SS:FF (frames), plus a date stamp
+  (function(){
+    var tc = document.getElementById('tc');
+    var ds = document.getElementById('datestamp');
+    var camno = document.getElementById('camno');
+    function pad(n){ return (n<10?'0':'')+n; }
+    var start = performance.now();
+    function tick(){
+      var d = new Date();
+      var elapsed = performance.now() - start;
+      var ff = Math.floor((elapsed/1000*24) % 24); // fake 24fps frame counter
+      tc.textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+':'+pad(ff);
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    try{
+      var d0 = new Date();
+      var mm=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      ds.textContent = 'ARCHIVE '+pad(d0.getDate())+' '+mm[d0.getMonth()]+' '+d0.getFullYear();
+    }catch(e){}
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── interactive CAM switcher: click a feed to select that camera ──
+    var selectedCam = null;
+    var grid = document.querySelector('.grid');
+    var feeds = Array.prototype.slice.call(document.querySelectorAll('.feed'));
+    feeds.forEach(function(feed){
+      var idEl = feed.querySelector('.cam .id');
+      var num = idEl ? (idEl.textContent.match(/\d+/) || ['0'])[0] : '0';
+      feed.setAttribute('tabindex','0');
+      feed.setAttribute('role','button');
+      feed.setAttribute('aria-pressed','false');
+      function toggle(){
+        if (feed.classList.contains('selected')){
+          feed.classList.remove('selected');
+          feed.setAttribute('aria-pressed','false');
+          grid.classList.remove('has-selection');
+          selectedCam = null;
+        } else {
+          feeds.forEach(function(f){ f.classList.remove('selected'); f.setAttribute('aria-pressed','false'); });
+          feed.classList.add('selected');
+          feed.setAttribute('aria-pressed','true');
+          grid.classList.add('has-selection');
+          selectedCam = pad(parseInt(num,10));
+          camno.textContent = selectedCam;
+        }
+      }
+      feed.addEventListener('click', toggle);
+      feed.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+      });
+    });
+
+    // cycle the CAM number in the top rail — pauses while a feed is selected
+    var n=1;
+    setInterval(function(){
+      if (selectedCam !== null) return;
+      n = n%7 + 1; camno.textContent = pad(n);
+    }, 2600);
+
+    // ── boot-up terminal sequence, then flicker the dossier in ──
+    var stage = document.querySelector('.stage');
+    var items = document.querySelectorAll('.reveal');
+    var boot = document.getElementById('boot');
+    var bootlog = document.getElementById('bootlog');
+    items.forEach(function(el,i){ el.style.transitionDelay = (0.12*i)+'s'; });
+
+    function finishBoot(){
+      stage.classList.add('booted');
+      if (boot){ boot.classList.add('gone'); setTimeout(function(){ boot.style.display='none'; }, 500); }
+    }
+
+    if (reduce || !boot || !bootlog){
+      if (boot){ boot.style.display='none'; }
+      stage.classList.add('booted');
+    } else {
+      var script = [
+        "> CCTV SURVEILLANCE OS  v4.6.3",
+        "> ACQUIRING SIGNAL ............ OK",
+        "> DECRYPTING CASE FILE #SM-01 ... OK",
+        "> SUBJECT .... CAMMYYY  [CLEARANCE: DIRECTOR]",
+        "> FEED ONLINE"
+      ].join("\n");
+      var i2 = 0;
+      var cur = document.createElement('span'); cur.className = 'cursor';
+      function type(){
+        if (i2 <= script.length){
+          bootlog.textContent = script.slice(0, i2);
+          bootlog.appendChild(cur);
+          i2++;
+          setTimeout(type, script.charAt(i2-1) === '\n' ? 90 : 13);
+        } else {
+          setTimeout(finishBoot, 420);
+        }
+      }
+      type();
+    }
+  })();
+</script>
+</body></html>
